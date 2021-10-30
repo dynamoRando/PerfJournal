@@ -12,26 +12,24 @@ namespace PerfJournal.Client
     public class PJClient
     {
         #region Private Fields
-        private string _fullUrl;
+        private Journal _journal;
         private string _projectName;
         private bool _autoCreateObjects;
-        private static readonly HttpClient _httpClient = new HttpClient();
-        private Project _currentProject;
 
-        private const string PROJECTS = "api/Projects";
-        private const string TESTERS = "api/Testers";
-        private const string TESTS = "api/Tests";
-        private const string BUILDS = "api/Builds";
-        private const string ENVIRONMENTS = "api/Environments";
-        private const string TEST_RESULTS = "api/TestResults";
+        private Project _currentProject;
 
         // testName (string), testId (int)
         private Dictionary<string, int> _tests;
         #endregion
 
         #region Public Properties
-        public string Url => _fullUrl;
+        public string Url => _journal.Url;
         public string Project => _projectName;
+
+        /// <summary>
+        /// Will attempt to create entries if they do not exist
+        /// </summary>
+        public bool CreateNewObjects => _autoCreateObjects;
         #endregion
 
         #region Constructors
@@ -41,9 +39,11 @@ namespace PerfJournal.Client
         /// <param name="url">The url, i.e. http://localhost</param>
         /// <param name="portNumber">The port number of the API</param>
         /// <param name="projectName">The name of the project this client will be saving results for</param>
+        /// <param name="autoCreateObjects">Configures the client to automatically create the objct if it doesn't exist in the journal</param>
         public PJClient(string url, int portNumber, string projectName, bool autoCreateObjects)
         {
-            _fullUrl = url + ":" + portNumber.ToString();
+            _journal = new Journal(url + ":" + portNumber.ToString());
+
             _tests = new Dictionary<string, int>();
             _projectName = projectName;
             _autoCreateObjects = autoCreateObjects;
@@ -51,88 +51,41 @@ namespace PerfJournal.Client
         #endregion
 
         #region Public Methods
+        /// <summary>
+        /// Checks the Journal for <see cref="Project"/> and constructs the Project if configured by <see cref="CreateNewObjects"></see>.
+        /// </summary>
+        /// <returns></returns>
         public async Task<Project> ConfigureProjectAsync()
         {
-            Project project = new Project { Id = 0, ProjectName = String.Empty };
-            int maxProjectId = 0;
-            string url = _fullUrl + "/" + PROJECTS;
-
-            var projectsTask = _httpClient.GetStreamAsync(url);
-            var projects = await JsonSerializer.DeserializeAsync<List<Project>>(await projectsTask);
-
-            foreach (var proj in projects)
+            if (_journal.HasProjectAsync(_projectName).Result)
             {
-                if (proj.Id > maxProjectId)
-                {
-                    maxProjectId = proj.Id;
-                }
-
-                if (string.Equals(proj.ProjectName, _projectName, StringComparison.OrdinalIgnoreCase))
-                {
-                    project = proj;
-                }
+                _currentProject = await _journal.GetProjectAsync(_projectName);
             }
-
-            // if we didn't find the project, then if configured, go ahead and create it
-            if (project.Id == 0)
+            else
             {
                 if (_autoCreateObjects)
                 {
-                    project = new Project { ProjectName = _projectName };
-                    _httpClient.DefaultRequestHeaders.Accept.Clear();
-                    _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-                    var response = await _httpClient.PostAsJsonAsync(url, project);
-
-                    if (response.IsSuccessStatusCode)
-                    {
-                        project = JsonSerializer.Deserialize<Project>(response.Content.ReadAsStringAsync().Result);
-                    }
+                    _currentProject = await _journal.CreateProjectAsync(_projectName);
                 }
             }
 
-            _currentProject = project;
-            return project;
+            return _currentProject;
         }
 
         public async Task<Test> ConfigureTestAsync(string testName)
         {
             Test test = new Test { Id = 0, TestName = String.Empty, Project = _currentProject };
-            int maxTestId = 0;
-            string url = _fullUrl + "/" + TESTS;
-
-            var testsTask = _httpClient.GetStreamAsync(url);
-            var tests = await JsonSerializer.DeserializeAsync<List<Test>>(await testsTask);
-
-            foreach (var t in tests)
+            if (_journal.HasTestAsync(testName, _currentProject.Id).Result)
             {
-                if (t.Id > maxTestId)
-                {
-                    maxTestId = t.Id;
-                }
-
-                if (string.Equals(t.TestName, testName, StringComparison.OrdinalIgnoreCase))
-                {
-                    test = t;
-                    test.Project = _currentProject;
-                }
+                test = await _journal.GetTestAsync(testName, _currentProject.Id);
+                test.Project = _currentProject;
             }
-
-            // if we didn't find the project, then if configured, go ahead and create it
-            if (test.Id == 0)
+            else
             {
                 if (_autoCreateObjects)
                 {
-                    test = new Test { TestName = _projectName, ProjectId = _currentProject.Id };
-                    _httpClient.DefaultRequestHeaders.Accept.Clear();
-                    _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-                    var response = await _httpClient.PostAsJsonAsync(url, test);
-
-                    if (response.IsSuccessStatusCode)
-                    {
-                        test = JsonSerializer.Deserialize<Test>(response.Content.ReadAsStringAsync().Result);
-                    }
+                    test = await _journal.CreateTestAsync(testName, _currentProject.Id);
+                    test.Project = _currentProject;
                 }
             }
 
