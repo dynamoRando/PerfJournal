@@ -16,6 +16,7 @@ namespace PerfJournal.Client
         private string _projectName;
         private bool _autoCreateObjects;
         private static readonly HttpClient _httpClient = new HttpClient();
+        private Project _currentProject;
 
         private const string PROJECTS = "api/Projects";
         private const string TESTERS = "api/Testers";
@@ -90,8 +91,54 @@ namespace PerfJournal.Client
                 }
             }
 
+            _currentProject = project;
             return project;
         }
+
+        public async Task<Test> ConfigureTestAsync(string testName)
+        {
+            Test test = new Test { Id = 0, TestName = String.Empty, Project = _currentProject };
+            int maxTestId = 0;
+            string url = _fullUrl + "/" + TESTS;
+
+            var testsTask = _httpClient.GetStreamAsync(url);
+            var tests = await JsonSerializer.DeserializeAsync<List<Test>>(await testsTask);
+
+            foreach (var t in tests)
+            {
+                if (t.Id > maxTestId)
+                {
+                    maxTestId = t.Id;
+                }
+
+                if (string.Equals(t.TestName, testName, StringComparison.OrdinalIgnoreCase))
+                {
+                    test = t;
+                    test.Project = _currentProject;
+                }
+            }
+
+            // if we didn't find the project, then if configured, go ahead and create it
+            if (test.Id == 0)
+            {
+                if (_autoCreateObjects)
+                {
+                    test = new Test { TestName = _projectName, ProjectId = _currentProject.Id };
+                    _httpClient.DefaultRequestHeaders.Accept.Clear();
+                    _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                    var response = await _httpClient.PostAsJsonAsync(url, test);
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        test = JsonSerializer.Deserialize<Test>(response.Content.ReadAsStringAsync().Result);
+                    }
+                }
+            }
+
+            return test;
+        }
+
         public void SaveResult(Test test, int totalMilliseconds, bool isSuccessful)
         {
             throw new NotImplementedException();
