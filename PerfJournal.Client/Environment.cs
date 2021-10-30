@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace PerfJournal.Client
 {
-    public struct Environment
+    internal class Environment
     {
         public int Id { get; set; }
         public string EnvironmentName { get; set; }

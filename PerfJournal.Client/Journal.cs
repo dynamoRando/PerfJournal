@@ -1,88 +1,74 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using System.Net.Http.Headers;
+using System.Net.Http.Json;
 
 namespace PerfJournal.Client
 {
-    public class Journal
+    public static class Journal
     {
-        #region Private Fields
-        private string _url;
-        private static readonly HttpClient _httpClient = new HttpClient();
-        #endregion
-
-        #region Public Properties
-        public string Url => _url;
-        #endregion
-
-        #region Constructors
-        public Journal(string url)
+        public static async Task<bool> HasTest(string journalUrl, string projectName, string testName)
         {
-            _url = url;
-        }
-        #endregion
-
-        #region Public Methods
-        public async Task<bool> HasProjectAsync(string projectName)
-        {
-            return await Project.HasProjectAsync(projectName, _httpClient, GetApiUrl(PJObject.Project));
+            JournalApi.Url = journalUrl;
+            return await JournalApi.HasTestAsync(projectName, testName);
         }
 
-        public async Task<Project> GetProjectAsync(string projectName)
+        public static async Task<bool> CreateProjectAsync(string journalUrl, string projectName)
         {
-            return await Project.GetProjectAsync(projectName, _httpClient, GetApiUrl(PJObject.Project));
-        }
+            JournalApi.Url = journalUrl;
+            var result = await JournalApi.CreateProjectAsync(projectName);
 
-        public async Task<Project> CreateProjectAsync(string projectName)
-        {
-            return await Project.CreateProjectAsync(projectName, _httpClient, GetApiUrl(PJObject.Project));
-        }
-
-        public async Task<bool> HasTestAsync(string testName, int projectId)
-        {
-            return await Test.HasTestAsync(testName, projectId, _httpClient, GetApiUrl(PJObject.Test));
-        }
-
-        public async Task<Test> GetTestAsync(string testName, int projectId)
-        {
-            return await Test.GetTestAsync(testName, projectId, _httpClient, GetApiUrl(PJObject.Test));
-        }
-
-        public async Task<Test> CreateTestAsync(string testName, int projectId)
-        {
-            return await Test.CreateTestAsync(testName, projectId, _httpClient, GetApiUrl(PJObject.Test));
-        }
-        #endregion
-
-        #region Private Methods
-        private string GetApiUrl(PJObject pjObject)
-        {
-            switch (pjObject)
+            if (result.Id != 0)
             {
-                case PJObject.Project:
-                    return _url + "/" + Constants.PROJECTS;
-                case PJObject.Tester:
-                    return _url + "/" + Constants.TESTERS;
-                case PJObject.Test:
-                    return _url + "/" + Constants.TESTS;
-                case PJObject.Build:
-                    return _url + "/" + Constants.BUILDS;
-                case PJObject.Environment:
-                    return _url + "/" + Constants.ENVIRONMENTS;
-                case PJObject.TestResult:
-                    return _url + "/" + Constants.TEST_RESULTS;
-                case PJObject.Unknown:
-                default:
-                    throw new InvalidOperationException("Unknown object type");
+                return true;
+            }
+            else
+            {
+                return false;
             }
         }
-        #endregion
 
+        public static async Task<bool> HasProject(string journalUrl, string projectName)
+        {
+            JournalApi.Url = journalUrl;
+            return await JournalApi.HasProjectAsync(projectName);
+        }
+
+        public static async Task<int> GetProjectIdAsync(string journalUrl, string projectName)
+        {
+            JournalApi.Url = journalUrl;
+            var result = await JournalApi.GetProjectAsync(projectName);
+            return result.Id;
+        }
+
+        public static async Task<int> GetTestIdAsync(string journalUrl, string projectName, string testName)
+        {
+            JournalApi.Url = journalUrl;
+            var projectResult = await JournalApi.GetProjectAsync(projectName);
+            var result = await JournalApi.GetTestAsync(testName, projectResult.Id);
+            return result.Id;
+        }
+
+        public static async Task<bool> SaveResult(string journalUrl, string projectName, string testName, int totalTimeInMilliseconds, bool isSuccessful)
+        {
+            JournalApi.Url = journalUrl;
+            if (JournalApi.HasProjectAsync(projectName).Result)
+            {
+                var projectResult = await JournalApi.GetProjectAsync(projectName);
+                int projectId = projectResult.Id;
+                if (JournalApi.HasTestAsync(testName, projectId).Result)
+                {
+                    var testResult = await JournalApi.GetTestAsync(testName, projectId);
+                    int testId = testResult.Id;
+                    return await JournalApi.SaveTestResult(projectId, testId, totalTimeInMilliseconds, isSuccessful);
+                }
+            }
+
+            return false;
+        }
     }
 }

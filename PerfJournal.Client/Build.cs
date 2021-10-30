@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace PerfJournal.Client
 {
-    public struct Build
+    internal class Build
     {
         public int Id;
         public Project Project;

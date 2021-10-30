@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace PerfJournal.Client
 {
-    public enum PJObject
+    internal enum PJObject
     {
         Unknown,
         Project,

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace PerfJournal.Client
 {
-    public static  class Constants
+    internal static class Constants
     {
         public const string PROJECTS = "api/Projects";
         public const string TESTERS = "api/Testers";

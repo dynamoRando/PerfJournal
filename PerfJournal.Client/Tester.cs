@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace PerfJournal.Client
 {
-    public struct Tester
+    internal class Tester
     {
         public int Id;
         public string Name;

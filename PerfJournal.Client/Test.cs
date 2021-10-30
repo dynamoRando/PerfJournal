@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace PerfJournal.Client
 {
-    public struct Test
+    internal class Test
     {
         [JsonPropertyName("id")]
         public int Id { get; set; }
