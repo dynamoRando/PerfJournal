@@ -117,5 +117,11 @@ namespace PerfJournal.Client
 
             return false;
         }
+
+        public static async Task<bool> SaveResultAsync(string journalUrl, int projectId, int testId, int totalTimeInMilliseconds, bool isSuccessful)
+        {
+            JournalApi.Url = journalUrl;
+            return await JournalApi.SaveTestResult(projectId, testId, totalTimeInMilliseconds, isSuccessful);
+        }
     }
 }
