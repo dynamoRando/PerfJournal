@@ -17,6 +17,9 @@ CREATE TABLE dbo.Project
 	ProjectName NVARCHAR(50) NOT NULL
 )
 
+ALTER TABLE Project   
+ADD CONSTRAINT UX_Project UNIQUE (ProjectName);   
+
 CREATE TABLE dbo.Build
 (
 	Id INT IDENTITY(1,1) PRIMARY KEY NOT NULL,
