@@ -12,7 +12,7 @@ namespace PerfJournal.Tests
         [Fact]
         public async void Test_ExistingProject()
         {
-            if (Journal.HasProject(_url, _projectName).Result)
+            if (Journal.HasProjectAsync(_url, _projectName).Result)
             {
                 var projectIdResult = await Journal.GetProjectIdAsync(_url, _projectName);
                 Assert.Equal(2, projectIdResult);
@@ -29,7 +29,7 @@ namespace PerfJournal.Tests
         {
             string testName = "TestExample";
 
-            if (Journal.HasTest(_url, _projectName, testName).Result)
+            if (Journal.HasTestAsync(_url, _projectName, testName).Result)
             {
                 var testResult = await Journal.GetTestIdAsync(_url, _projectName, testName);
                 Assert.Equal(2, testResult);
@@ -45,7 +45,7 @@ namespace PerfJournal.Tests
         {
             string testName = "TestExample";
 
-            var result = await Journal.SaveResult(_url, _projectName, testName, 4000, true);
+            var result = await Journal.SaveResultAsync(_url, _projectName, testName, 4000, true);
             Assert.True(result);
         }
 
@@ -53,7 +53,7 @@ namespace PerfJournal.Tests
         public async void Test_NewProject()
         {
             string projectName = "NewProject" + DateTime.Now.ToString();
-            var hasProject = await Journal.HasProject(_url, projectName);
+            var hasProject = await Journal.HasProjectAsync(_url, projectName);
             if (!hasProject)
             {
                 var result = await Journal.CreateProjectAsync(_url, projectName);

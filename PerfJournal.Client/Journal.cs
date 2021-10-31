@@ -11,7 +11,7 @@ namespace PerfJournal.Client
 {
     public static class Journal
     {
-        public static async Task<bool> HasTest(string journalUrl, string projectName, string testName)
+        public static async Task<bool> HasTestAsync(string journalUrl, string projectName, string testName)
         {
             JournalApi.Url = journalUrl;
             return await JournalApi.HasTestAsync(projectName, testName);
@@ -32,7 +32,7 @@ namespace PerfJournal.Client
             }
         }
 
-        public static async Task<bool> HasProject(string journalUrl, string projectName)
+        public static async Task<bool> HasProjectAsync(string journalUrl, string projectName)
         {
             JournalApi.Url = journalUrl;
             return await JournalApi.HasProjectAsync(projectName);
@@ -53,7 +53,7 @@ namespace PerfJournal.Client
             return result.Id;
         }
 
-        public static async Task<bool> SaveResult(string journalUrl, string projectName, string testName, int totalTimeInMilliseconds, bool isSuccessful)
+        public static async Task<bool> SaveResultAsync(string journalUrl, string projectName, string testName, int totalTimeInMilliseconds, bool isSuccessful)
         {
             JournalApi.Url = journalUrl;
             if (JournalApi.HasProjectAsync(projectName).Result)

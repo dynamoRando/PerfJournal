@@ -2,6 +2,18 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
+    <AssemblyVersion>1.0.0.1</AssemblyVersion>
+    <FileVersion></FileVersion>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Authors>dynamoRando</Authors>
+    <Company>Drummersoft</Company>
   </PropertyGroup>
+  <PropertyGroup>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Description>A client for submitting test results to a PerfJournal instance.</Description>
+    <PackageProjectUrl>https://github.com/dynamoRando/PerfJournal</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/dynamoRando/PerfJournal</RepositoryUrl>
+  </PropertyGroup>
+
 
 </Project>
