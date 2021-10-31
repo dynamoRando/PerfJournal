@@ -17,12 +17,52 @@ namespace PerfJournal.Client
             return await JournalApi.HasTestAsync(projectName, testName);
         }
 
+        public static async Task<bool> HasTestAsync(string journalUrl, int projectId, string testName)
+        {
+            JournalApi.Url = journalUrl;
+            return await JournalApi.HasTestAsync(projectId, testName);
+        }
+
+
         public static async Task<bool> CreateProjectAsync(string journalUrl, string projectName)
         {
             JournalApi.Url = journalUrl;
             var result = await JournalApi.CreateProjectAsync(projectName);
 
             if (result.Id != 0)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public static async Task<bool> CreateTestAsync(string journalUrl, string projectName, string testName)
+        {
+            JournalApi.Url = journalUrl;
+
+            var project = await JournalApi.GetProjectAsync(projectName);
+            var test = await JournalApi.CreateTestAsync(testName, project.Id);
+
+            if (test.Id != 0)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public static async Task<bool> CreateTestAsync(string journalUrl, int projectId, string testName)
+        {
+            JournalApi.Url = journalUrl;
+
+            var test = await JournalApi.CreateTestAsync(testName, projectId);
+
+            if (test.Id != 0)
             {
                 return true;
             }
@@ -53,6 +93,13 @@ namespace PerfJournal.Client
             return result.Id;
         }
 
+        public static async Task<int> GetTestIdAsync(string journalUrl, int projectId, string testName)
+        {
+            JournalApi.Url = journalUrl;
+            var result = await JournalApi.GetTestAsync(testName, projectId);
+            return result.Id;
+        }
+
         public static async Task<bool> SaveResultAsync(string journalUrl, string projectName, string testName, int totalTimeInMilliseconds, bool isSuccessful)
         {
             JournalApi.Url = journalUrl;
@@ -60,7 +107,7 @@ namespace PerfJournal.Client
             {
                 var projectResult = await JournalApi.GetProjectAsync(projectName);
                 int projectId = projectResult.Id;
-                if (JournalApi.HasTestAsync(testName, projectId).Result)
+                if (JournalApi.HasTestAsync(projectId, testName).Result)
                 {
                     var testResult = await JournalApi.GetTestAsync(testName, projectId);
                     int testId = testResult.Id;

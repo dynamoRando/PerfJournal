@@ -39,7 +39,7 @@ namespace PerfJournal.Client
             return await Project.CreateProjectAsync(projectName, _httpClient, GetApiUrl(PJObject.Project));
         }
 
-        public static async Task<bool> HasTestAsync(string testName, int projectId)
+        public static async Task<bool> HasTestAsync(int projectId, string testName)
         {
             return await Test.HasTestAsync(testName, projectId, _httpClient, GetApiUrl(PJObject.Test));
         }

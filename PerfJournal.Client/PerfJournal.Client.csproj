@@ -1,18 +1,20 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
-    <AssemblyVersion>1.0.0.1</AssemblyVersion>
-    <FileVersion></FileVersion>
-    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
+    <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
     <Authors>dynamoRando</Authors>
     <Company>Drummersoft</Company>
+    <Version>1.0.0.0</Version>
   </PropertyGroup>
   <PropertyGroup>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Description>A client for submitting test results to a PerfJournal instance.</Description>
     <PackageProjectUrl>https://github.com/dynamoRando/PerfJournal</PackageProjectUrl>
     <RepositoryUrl>https://github.com/dynamoRando/PerfJournal</RepositoryUrl>
+    <Version>$(Version)</Version>
   </PropertyGroup>
 
 
