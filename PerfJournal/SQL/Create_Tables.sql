@@ -40,6 +40,9 @@ CREATE TABLE dbo.Test
 	TestDescription NVARCHAR(1000) NULL -- this is optional
 )
 
+ALTER TABLE Test   
+ADD CONSTRAINT UX_ProjectTest UNIQUE (ProjectId, TestName);   
+
 CREATE TABLE dbo.Tester
 (
 	Id INT IDENTITY(1,1) PRIMARY KEY NOT NULL,
